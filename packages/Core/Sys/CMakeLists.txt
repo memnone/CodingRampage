@@ -1,0 +1,54 @@
+###############################################################################
+#
+# Rampage Core/Sys library
+#
+###############################################################################
+
+if(RAMPAGE_BUILD_CORE)
+	SET(PACKAGE_DIR "${PACKAGE_CORE}/Sys")
+
+	# EXPAT
+	find_package(EXPAT REQUIRED)
+	
+	FILE(GLOB_RECURSE PACKAGE_SOURCES "${PACKAGE_DIR}/src/*.cpp")
+	FILE(GLOB_RECURSE PACKAGE_HEADERS "${PACKAGE_DIR}/include/*.h")
+
+	if(RAMPAGE_DYNAMIC_LIBS)
+		ADD_LIBRARY(RampageSys SHARED ${PACKAGE_SOURCES} ${PACKAGE_HEADERS})		
+		TARGET_COMPILE_OPTIONS(RampageSys PUBLIC ${CMAKE_DLL_EXPORT_FLAGS})
+	else(RAMPAGE_DYNAMIC_LIBS)
+		ADD_LIBRARY(RampageSys STATIC ${PACKAGE_SOURCES} ${PACKAGE_HEADERS})
+	endif(RAMPAGE_DYNAMIC_LIBS)
+
+	# Windows 32/64 bit
+	if (WIN32)
+		TARGET_COMPILE_OPTIONS(RampageSys PUBLIC /D_CRT_SECURE_NO_WARNINGS)
+		TARGET_LINK_LIBRARIES(RampageSys RampageDefs WinMM ${EXPAT_LIBRARIES} ${CMAKE_DL_LIBS})
+	# Unix Linux/Apple
+	elseif (UNIX)
+		if (APPLE)
+			TARGET_LINK_LIBRARIES(RampageSys RampageDefs pthread ${EXPAT_LIBRARIES} ${CMAKE_DL_LIBS})
+		else(APPLE)
+			TARGET_LINK_LIBRARIES(RampageSys RampageDefs pthread rt ${EXPAT_LIBRARIES} ${CMAKE_DL_LIBS})
+		endif()
+	endif ()
+
+	TARGET_INCLUDE_DIRECTORIES(RampageSys PUBLIC ${PACKAGE_DIR}/include ${PACKAGE_CORE}/Math/include ${EXPAT_INCLUDE_DIRS})
+		
+	if (CPACK_BUILD_CORE)
+		if(RAMPAGE_DYNAMIC_LIBS)
+			if (WIN32)
+				INSTALL(TARGETS RampageSys RUNTIME DESTINATION bin COMPONENT core_libs)
+			elseif (UNIX)
+				INSTALL(TARGETS RampageSys LIBRARY DESTINATION bin COMPONENT core_libs)
+			endif()
+		else(RAMPAGE_DYNAMIC_LIBS)
+			INSTALL(TARGETS RampageSys ARCHIVE DESTINATION lib COMPONENT core_libs)
+		endif(RAMPAGE_DYNAMIC_LIBS)
+		INSTALL(FILES ${PACKAGE_HEADERS} DESTINATION include/Rampage/Sys/ COMPONENT core_headers)
+	endif (CPACK_BUILD_CORE)
+	
+	SET_PROPERTY(TARGET RampageSys PROPERTY PROJECT_LABEL "Sys")
+	SET_PROPERTY(TARGET RampageSys PROPERTY FOLDER "Core")
+	SOURCE_GROUP("Include Files" FILES ${PACKAGE_HEADERS})
+endif(RAMPAGE_BUILD_CORE)

@@ -1,0 +1,61 @@
+###############################################################################
+#
+# Rampage UI/App library
+#
+###############################################################################
+
+if(RAMPAGE_BUILD_UI)
+	SET(PACKAGE_DIR "${PACKAGE_UI}/App")
+
+	# Boost
+	if (WIN32)
+		ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
+		SET(Boost_USE_STATIC_LIBS ON)
+		SET(Boost_ALL_DYN_LINK OFF)
+	elseif (UNIX)
+		#ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
+		#SET(Boost_USE_STATIC_LIBS OFF)
+		#SET(Boost_ALL_DYN_LINK ON)
+	endif ()
+	FIND_PACKAGE(Boost COMPONENTS filesystem)
+	# OpenCV
+	FIND_PACKAGE(OpenCV REQUIRED)
+
+	FILE(GLOB_RECURSE PACKAGE_SOURCES "${PACKAGE_DIR}/src/*.cpp")
+	FILE(GLOB_RECURSE PACKAGE_HEADERS "${PACKAGE_DIR}/include/*.h")
+
+	if(RAMPAGE_DYNAMIC_LIBS)
+		ADD_LIBRARY(RampageApp SHARED ${PACKAGE_SOURCES} ${PACKAGE_HEADERS})
+		if (WIN32)		
+			TARGET_COMPILE_OPTIONS(RampageApp PUBLIC ${CMAKE_DLL_EXPORT_FLAGS})
+		elseif (UNIX)
+		endif()
+	else(RAMPAGE_DYNAMIC_LIBS)
+		ADD_LIBRARY(RampageApp STATIC ${PACKAGE_SOURCES} ${PACKAGE_HEADERS})
+	endif(RAMPAGE_DYNAMIC_LIBS)
+
+	if (WIN32)
+		TARGET_LINK_LIBRARIES(RampageApp RampageSys ${Boost_LIBRARIES})
+	elseif (UNIX)
+		TARGET_LINK_LIBRARIES(RampageApp RampageSys ${Boost_LIBRARIES})
+	endif()
+	
+	TARGET_INCLUDE_DIRECTORIES(RampageApp PUBLIC ${PACKAGE_DIR}/include ${Boost_INCLUDE_DIRS} ${OPENCV_INCLUDE_DIRS})
+	
+	if (CPACK_BUILD_CORE)
+		if(RAMPAGE_DYNAMIC_LIBS)
+			if (WIN32)
+				INSTALL(TARGETS RampageApp RUNTIME DESTINATION bin COMPONENT core_libs)
+			elseif (UNIX)
+				INSTALL(TARGETS RampageApp LIBRARY DESTINATION bin COMPONENT core_libs)
+			endif()
+		else(RAMPAGE_DYNAMIC_LIBS)
+			INSTALL(TARGETS RampageApp ARCHIVE DESTINATION lib COMPONENT core_libs)
+		endif(RAMPAGE_DYNAMIC_LIBS)
+		INSTALL(FILES ${PACKAGE_HEADERS} DESTINATION include/Rampage/App/ COMPONENT core_headers)
+	endif (CPACK_BUILD_CORE)
+	
+	SET_PROPERTY(TARGET RampageApp PROPERTY PROJECT_LABEL "App")
+	SET_PROPERTY(TARGET RampageApp PROPERTY FOLDER "UI")
+	SOURCE_GROUP("Include Files" FILES ${PACKAGE_HEADERS})
+endif(RAMPAGE_BUILD_UI)

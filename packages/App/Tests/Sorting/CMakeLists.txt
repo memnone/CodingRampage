@@ -1,0 +1,32 @@
+###############################################################################
+#
+# Coding Rampage App/Test/Sorting application
+#
+###############################################################################
+
+if(RAMPAGE_BUILD_APP_TESTS)
+	SET(PACKAGE_DIR "${PACKAGE_APP_TESTS}/Sorting")
+
+	FILE(GLOB_RECURSE PACKAGE_SOURCES "${PACKAGE_DIR}/src/*.cpp")
+	FILE(GLOB_RECURSE PACKAGE_HEADERS "${PACKAGE_DIR}/include/*.h")
+	FILE(GLOB_RECURSE PACKAGE_FILES "${PACKAGE_DIR}/resources/*.xml")
+
+	ADD_EXECUTABLE(RampageAppSorting ${PACKAGE_SOURCES} ${PACKAGE_HEADERS} ${PACKAGE_FILES})
+	TARGET_LINK_LIBRARIES(RampageAppSorting RampageApp RampageSorting)
+	TARGET_INCLUDE_DIRECTORIES(RampageAppSorting PUBLIC ${PACKAGE_DIR}/include)
+
+	COPY_FILES(RampageAppSorting ${RUNTIME_OUTPUT_DIRECTORY} ${PACKAGE_FILES})
+	SET_PROPERTY(TARGET RampageAppSorting PROPERTY RELEASE_POSTFIX ${CMAKE_RELEASE_POSTFIX})
+	SET_PROPERTY(TARGET RampageAppSorting PROPERTY DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	
+	if (CPACK_BUILD_CORE)
+		INSTALL(TARGETS RampageAppSorting RUNTIME DESTINATION bin COMPONENT app_execs)
+		INSTALL(FILES ${PACKAGE_HEADERS} DESTINATION include/Rampage/App/Sorting/ COMPONENT app_headers)
+		INSTALL(FILES ${PACKAGE_FILES} DESTINATION bin COMPONENT app_configs)
+	endif (CPACK_BUILD_CORE)
+
+	SET_PROPERTY(TARGET RampageAppSorting PROPERTY PROJECT_LABEL "Sorting")
+	SET_PROPERTY(TARGET RampageAppSorting PROPERTY FOLDER "App/Tests")
+	SOURCE_GROUP("Include Files" FILES ${PACKAGE_HEADERS})
+	SOURCE_GROUP("Resource Files" FILES ${PACKAGE_FILES})
+endif(RAMPAGE_BUILD_APP_TESTS)
