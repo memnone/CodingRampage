@@ -17,19 +17,16 @@
 //------------------------------------------------------------------------------
 
 #include <Rampage/App/Application.h>
-#include <Rampage/Sorting/Mergesort.h>
-#include <vector>
-#include <list>
-#include <iostream>
-#include <map>
-#include <functional>
 
 //------------------------------------------------------------------------------
 
 namespace rampage {
 
 //------------------------------------------------------------------------------
-
+/**
+* @brief Test algorithm for the RampageSorting library.
+* Testing mergesort and quicksort for std::vector<int> and std::list<int>.
+*/
 class TestSorting : public Application {
 protected:
 	/** Prints a container */
